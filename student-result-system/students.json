@@ -1,0 +1,62 @@
+[
+    {
+        "name": "emmanuel odeh",
+        "matric_no": "stu001",
+        "subjects": {
+            "Mathematics": 87.0,
+            "English": 43.0,
+            "Biology": 67.0
+        },
+        "total": 197.0,
+        "average": 65.66666666666667,
+        "grade": "B"
+    },
+    {
+        "name": "john ikwube",
+        "matric_no": "stu002",
+        "subjects": {
+            "Mathematics": 43.0,
+            "English": 65.0,
+            "Biology": 24.0
+        },
+        "total": 132.0,
+        "average": 44.0,
+        "grade": "E"
+    },
+    {
+        "name": "nese girinya",
+        "matric_no": "stu003",
+        "subjects": {
+            "Mathematics": 24.0,
+            "English": 53.0,
+            "Biology": 43.0
+        },
+        "total": 120.0,
+        "average": 40.0,
+        "grade": "E"
+    },
+    {
+        "name": "onyeke benedict",
+        "matric_no": "stu004",
+        "subjects": {
+            "Mathematics": 12.0,
+            "English": 41.0,
+            "Biology": 29.0
+        },
+        "total": 82.0,
+        "average": 27.333333333333332,
+        "grade": "F"
+    },
+    {
+        "name": "kingsley exenaia",
+        "matric_no": "stu005",
+        "subjects": {
+            "Mathematics": 68.0,
+            "English": 45.0,
+            "Biology": 79.0
+        },
+        "total": 192.0,
+        "average": 64.0,
+        "grade": "B"
+    }
+]
