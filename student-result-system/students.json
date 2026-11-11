@@ -58,5 +58,17 @@
         "total": 192.0,
         "average": 64.0,
         "grade": "B"
+    },
+    {
+        "name": "eunice obeko",
+        "matric_no": "stu006",
+        "subjects": {
+            "Mathematics": 54.0,
+            "English": 49.0,
+            "Biology": 17.0
+        },
+        "total": 120.0,
+        "average": 40.0,
+        "grade": "E"
     }
 ]
