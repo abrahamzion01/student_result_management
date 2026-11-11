@@ -70,5 +70,13 @@
         "total": 120.0,
         "average": 40.0,
         "grade": "E"
+    },
+    {
+        "name": "abdulah ahmed",
+        "matric_no": "stu007",
+        "subjects": {},
+        "total": null,
+        "average": null,
+        "grade": null
     }
 ]
