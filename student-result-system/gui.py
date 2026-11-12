@@ -90,10 +90,10 @@ def validate_student_name(name):
     return bool(cleaned) and any(character.isalpha() for character in cleaned)
 
 
-def find_student(matric):
-    matric = matric.strip().lower()
+def find_student(registration):
+    registration = registration.strip().lower()
     for student in main.students:
-        if student.get("matric_no", "").lower() == matric:
+        if student.get("reg_no", "").lower() == registration:
             return student
     return None
 
@@ -208,7 +208,7 @@ def show_result_window(student):
     body.pack(fill="both", expand=True, padx=18, pady=18)
 
     tk.Label(
-        body, text=f"Matriculation number: {student.get('matric_no', '')}",
+        body, text=f"Registration number: {student.get('reg_no', '')}",
         bg=WHITE, fg=MUTED, font=("Segoe UI", 10)
     ).pack(anchor="w", pady=(0, 15))
 
@@ -286,11 +286,11 @@ def show_dashboard():
     section_title(recent_panel, "Recently registered students",
                   "A quick view of the latest student records")
 
-    columns = ("name", "matric", "average", "grade")
+    columns = ("name", "registration", "average", "grade")
     table = ttk.Treeview(recent_panel, columns=columns, show="headings", height=9)
     for col, label, width in [
         ("name", "STUDENT NAME", 220),
-        ("matric", "MATRIC NUMBER", 150),
+        ("registration", "REGISTRATION NUMBER", 150),
         ("average", "AVERAGE", 100),
         ("grade", "GRADE", 70),
     ]:
@@ -302,7 +302,7 @@ def show_dashboard():
             "", "end",
             values=(
                 student.get("name", ""),
-                student.get("matric_no", ""),
+                student.get("reg_no", ""),
                 f"{average:.2f}%" if average is not None else "Pending",
                 student.get("grade") or "-",
             ),
@@ -345,28 +345,28 @@ def show_register_page():
     panel.pack(anchor="nw", fill="x", padx=30, pady=5)
 
     section_title(panel, "Student information",
-                  "Enter the student's name and unique matriculation number.")
+                  "Enter the student's name and unique registration number.")
 
     name_entry = add_labeled_entry(panel, "Full name")
-    matric_entry = add_labeled_entry(panel, "Matriculation number")
+    registration_entry = add_labeled_entry(panel, "Registration number")
 
     def save_student():
         name = name_entry.get().strip()
-        matric = matric_entry.get().strip()
+        registration = registration_entry.get().strip()
 
-        if not name or not matric:
+        if not name or not registration:
             messagebox.showerror("Missing information", "Please fill in both fields.", parent=root)
             return
         if not validate_student_name(name):
             messagebox.showerror("Invalid name", "Please enter a valid student name.", parent=root)
             return
-        if find_student(matric):
-            messagebox.showerror("Duplicate record", "That matriculation number already exists.", parent=root)
+        if find_student(registration):
+            messagebox.showerror("Duplicate record", "That registration number already exists.", parent=root)
             return
 
         main.students.append({
             "name": name,
-            "matric_no": matric,
+            "reg_no": registration,
             "subjects": {},
             "total": None,
             "average": None,
@@ -396,18 +396,18 @@ def show_scores_page():
     panel.pack(anchor="nw", fill="x", padx=30, pady=5)
     section_title(panel, "Score information", "Scores must be numbers between 0 and 100.")
 
-    matric_entry = add_labeled_entry(panel, "Matriculation number")
+    registration_entry = add_labeled_entry(panel, "Registration number")
     score_entries = {}
     for subject in main.SUBJECTS:
         score_entries[subject] = add_labeled_entry(panel, f"{subject} score")
 
     def save_scores():
-        student = find_student(matric_entry.get())
-        if not matric_entry.get().strip():
-            messagebox.showerror("Missing information", "Enter a matriculation number.", parent=root)
+        student = find_student(registration_entry.get())
+        if not registration_entry.get().strip():
+            messagebox.showerror("Missing information", "Enter a registration number.", parent=root)
             return
         if student is None:
-            messagebox.showerror("Student not found", "No student has that matriculation number.", parent=root)
+            messagebox.showerror("Student not found", "No student has that registration number.", parent=root)
             return
 
         scores = {}
@@ -451,10 +451,10 @@ def show_results_page():
     )
     panel.pack(fill="both", expand=True, padx=30, pady=5)
 
-    columns = ("name", "matric", "maths", "english", "biology", "total", "average", "grade")
+    columns = ("name", "registration", "maths", "english", "biology", "total", "average", "grade")
     table = ttk.Treeview(panel, columns=columns, show="headings")
     headings = {
-        "name": "STUDENT", "matric": "MATRIC NO.",
+        "name": "STUDENT", "registration": "REGISTRATION NO.",
         "maths": "MATHEMATICS", "english": "ENGLISH",
         "biology": "BIOLOGY", "total": "TOTAL",
         "average": "AVERAGE", "grade": "GRADE",
@@ -463,19 +463,19 @@ def show_results_page():
         table.heading(col, text=headings[col])
         table.column(col, width=115, anchor="center")
     table.column("name", width=160, anchor="w")
-    table.column("matric", width=130)
+    table.column("registration", width=130)
 
     for student in main.students:
         subjects = student.get("subjects", {})
         average = student.get("average")
         if average is None:
             values = (
-                student.get("name", ""), student.get("matric_no", ""),
+                student.get("name", ""), student.get("reg_no", ""),
                 "-", "-", "-", "-", "Pending", "-",
             )
         else:
             values = (
-                student.get("name", ""), student.get("matric_no", ""),
+                student.get("name", ""), student.get("reg_no", ""),
                 subjects.get("Mathematics", "-"),
                 subjects.get("English", "-"),
                 subjects.get("Biology", "-"),
@@ -497,25 +497,25 @@ def show_results_page():
 def show_search_page():
     set_active_nav("Search Student")
     clear_page()
-    page_heading("Search student", "Find a student using their matriculation number.")
+    page_heading("Search student", "Find a student using their registration number.")
 
     panel = tk.Frame(
         page_area, bg=WHITE, padx=28, pady=25,
         highlightbackground=BORDER, highlightthickness=1
     )
     panel.pack(anchor="nw", fill="x", padx=30, pady=5)
-    section_title(panel, "Student lookup", "Enter the matriculation number to view the student's result.")
+    section_title(panel, "Student lookup", "Enter the registration number to view the student's result.")
 
-    matric_entry = add_labeled_entry(panel, "Matriculation number")
+    registration_entry = add_labeled_entry(panel, "Registration number")
 
     def search():
-        matric = matric_entry.get().strip()
-        if not matric:
-            messagebox.showerror("Missing information", "Enter a matriculation number.", parent=root)
+        registration = registration_entry.get().strip()
+        if not registration:
+            messagebox.showerror("Missing information", "Enter a registration number.", parent=root)
             return
-        student = find_student(matric)
+        student = find_student(registration)
         if student is None:
-            messagebox.showerror("Not found", "No student matches that matriculation number.", parent=root)
+            messagebox.showerror("Not found", "No student matches that registration number.", parent=root)
             return
         show_result_window(student)
 
@@ -557,7 +557,7 @@ def show_performer(best=True):
         font=("Segoe UI", 23, "bold")
     ).pack(anchor="w", pady=(10, 4))
     tk.Label(
-        panel, text=f"Matriculation number: {student['matric_no']}",
+        panel, text=f"Registration number: {student['reg_no']}",
         bg=WHITE, fg=MUTED, font=("Segoe UI", 10)
     ).pack(anchor="w")
     tk.Label(
@@ -672,339 +672,6 @@ avatar = tk.Label(
     font=("Segoe UI", 11, "bold"), width=3, height=1
 )
 avatar.pack(side="right", pady=17)
-
-
-# -------------------- AUTHENTICATION AND ROLE DASHBOARDS --------------------
-
-current_user = None
-
-
-def update_topbar_user(user):
-    for widget in top_right.winfo_children():
-        widget.destroy()
-
-    role = user["role"].upper()
-
-    tk.Label(
-        top_right,
-        text=role,
-        bg=WHITE,
-        fg=NAVY,
-        font=("Segoe UI", 9, "bold")
-    ).pack(side="left", padx=10)
-
-    tk.Button(
-        top_right,
-        text="Logout",
-        command=logout,
-        bg=BLUE_LIGHT,
-        fg=BLUE,
-        relief="flat",
-        font=("Segoe UI", 9, "bold"),
-        padx=14,
-        pady=8,
-        cursor="hand2"
-    ).pack(side="right")
-
-
-def show_student_dashboard(user):
-    clear_page()
-
-    page_heading(
-        "Student Dashboard",
-        f"Welcome, {user['username']}! Here is your school overview."
-    )
-
-    tk.Label(
-        page_area,
-        text="STUDENT PORTAL",
-        bg=BG,
-        fg=BLUE,
-        font=("Segoe UI", 11, "bold")
-    ).pack(anchor="w", padx=30, pady=15)
-
-    make_card(
-        page_area,
-        "Student ID",
-        user["username"],
-        BLUE,
-        "Your registered account"
-    )
-
-    tk.Label(
-        page_area,
-        text="Quick Actions",
-        bg=BG,
-        fg=DARK,
-        font=("Segoe UI", 15, "bold")
-    ).pack(anchor="w", padx=30, pady=(25, 10))
-
-    tk.Button(
-        page_area,
-        text="Mark Daily Attendance",
-        command=lambda: messagebox.showinfo(
-            "Attendance",
-            "Daily attendance will be implemented in the next module."
-        ),
-        bg=BLUE,
-        fg=WHITE,
-        font=("Segoe UI", 10, "bold"),
-        relief="flat",
-        padx=20,
-        pady=12
-    ).pack(anchor="w", padx=30, pady=8)
-
-    tk.Button(
-        page_area,
-        text="View My Results",
-        command=lambda: messagebox.showinfo(
-            "Results",
-            "Your personal results page will be connected soon."
-        ),
-        bg=GREEN,
-        fg=WHITE,
-        font=("Segoe UI", 10, "bold"),
-        relief="flat",
-        padx=20,
-        pady=12
-    ).pack(anchor="w", padx=30, pady=8)
-
-
-def show_teacher_dashboard(user):
-    clear_page()
-
-    page_heading(
-        "Teacher Dashboard",
-        f"Welcome, {user['username']}! Manage your academic activities."
-    )
-
-    tk.Label(
-        page_area,
-        text="TEACHER PORTAL",
-        bg=BG,
-        fg=GREEN,
-        font=("Segoe UI", 11, "bold")
-    ).pack(anchor="w", padx=30, pady=15)
-
-    make_card(
-        page_area,
-        "Teacher ID",
-        user["username"],
-        GREEN,
-        "Your registered account"
-    )
-
-    tk.Label(
-        page_area,
-        text="Teaching Activities",
-        bg=BG,
-        fg=DARK,
-        font=("Segoe UI", 15, "bold")
-    ).pack(anchor="w", padx=30, pady=(25, 10))
-
-    actions = [
-        "View Assigned Classes",
-        "Monitor Student Attendance",
-        "Enter Student Scores",
-        "Compile Results"
-    ]
-
-    for action in actions:
-        tk.Button(
-            page_area,
-            text=action,
-            command=lambda name=action: messagebox.showinfo(
-                name,
-                f"{name} will be connected in the next development stage."
-            ),
-            bg=WHITE,
-            fg=NAVY,
-            relief="solid",
-            bd=1,
-            font=("Segoe UI", 10, "bold"),
-            padx=20,
-            pady=12,
-            cursor="hand2"
-        ).pack(anchor="w", padx=30, pady=6)
-
-
-def logout():
-    global current_user
-
-    current_user = None
-
-    sidebar.pack_forget()
-    main_area.pack_forget()
-
-    show_login_page()
-
-
-def handle_login(username_entry, password_entry):
-    global current_user
-
-    username = username_entry.get().strip()
-    password = password_entry.get()
-
-    if not username or not password:
-        messagebox.showwarning(
-            "Missing Information",
-            "Please enter your username and password."
-        )
-        return
-
-    user = authentication.login_user(username, password)
-
-    if user is None:
-        messagebox.showerror(
-            "Login Failed",
-            "Incorrect username or password."
-        )
-        return
-
-    current_user = user
-
-    # Remove the login screen
-    login_frame.destroy()
-
-    # Display the main application
-    main_area.pack(side="right", fill="both", expand=True)
-    update_topbar_user(user)
-
-    if user["role"] == "admin":
-        sidebar.pack(side="left", fill="y")
-        show_dashboard()
-
-    elif user["role"] == "teacher":
-        sidebar.pack_forget()
-        show_teacher_dashboard(user)
-
-    elif user["role"] == "student":
-        sidebar.pack_forget()
-        show_student_dashboard(user)
-
-
-def show_login_page():
-    global login_frame
-
-    sidebar.pack_forget()
-    main_area.pack_forget()
-
-    login_frame = tk.Frame(root, bg=BG)
-    login_frame.pack(fill="both", expand=True)
-
-    login_card = tk.Frame(
-        login_frame,
-        bg=WHITE,
-        padx=45,
-        pady=40,
-        highlightbackground=BORDER,
-        highlightthickness=1
-    )
-    login_card.place(relx=0.5, rely=0.5, anchor="center")
-
-    tk.Label(
-        login_card,
-        text="EduStack",
-        bg=WHITE,
-        fg=NAVY,
-        font=("Segoe UI", 27, "bold")
-    ).pack(pady=(0, 5))
-
-    tk.Label(
-        login_card,
-        text="SCHOOL MANAGEMENT SYSTEM",
-        bg=WHITE,
-        fg=BLUE,
-        font=("Segoe UI", 9, "bold")
-    ).pack(pady=(0, 25))
-
-    tk.Label(
-        login_card,
-        text="Welcome Back",
-        bg=WHITE,
-        fg=DARK,
-        font=("Segoe UI", 17, "bold")
-    ).pack(anchor="w")
-
-    tk.Label(
-        login_card,
-        text="Sign in to access your school dashboard.",
-        bg=WHITE,
-        fg=MUTED,
-        font=("Segoe UI", 9)
-    ).pack(anchor="w", pady=(5, 20))
-
-    tk.Label(
-        login_card,
-        text="Username / ID",
-        bg=WHITE,
-        fg=DARK,
-        font=("Segoe UI", 9, "bold")
-    ).pack(anchor="w")
-
-    username_entry = tk.Entry(
-        login_card,
-        width=38,
-        font=("Segoe UI", 11),
-        relief="solid",
-        bd=1
-    )
-    username_entry.pack(pady=(7, 16), ipady=9)
-
-    tk.Label(
-        login_card,
-        text="Password",
-        bg=WHITE,
-        fg=DARK,
-        font=("Segoe UI", 9, "bold")
-    ).pack(anchor="w")
-
-    password_entry = tk.Entry(
-        login_card,
-        width=38,
-        show="*",
-        font=("Segoe UI", 11),
-        relief="solid",
-        bd=1
-    )
-    password_entry.pack(pady=(7, 20), ipady=9)
-
-    tk.Button(
-        login_card,
-        text="Sign In",
-        command=lambda: handle_login(
-            username_entry,
-            password_entry
-        ),
-        bg=BLUE,
-        fg=WHITE,
-        activebackground=NAVY,
-        activeforeground=WHITE,
-        relief="flat",
-        font=("Segoe UI", 11, "bold"),
-        padx=20,
-        pady=12,
-        cursor="hand2"
-    ).pack(fill="x")
-
-    tk.Label(
-        login_card,
-        text="EduStack | School Management",
-        bg=WHITE,
-        fg=MUTED,
-        font=("Segoe UI", 8)
-    ).pack(pady=(22, 0))
-
-    username_entry.focus_set()
-
-    # Press Enter to log in
-    password_entry.bind(
-        "<Return>",
-        lambda event: handle_login(
-            username_entry,
-            password_entry
-        )
-    )
 
 
 # -------------------- AUTHENTICATION AND ROLE DASHBOARDS --------------------

@@ -1,7 +1,6 @@
 [
     {
         "name": "emmanuel odeh",
-        "matric_no": "stu001",
         "subjects": {
             "Mathematics": 87.0,
             "English": 43.0,
@@ -9,11 +8,11 @@
         },
         "total": 197.0,
         "average": 65.66666666666667,
-        "grade": "B"
+        "grade": "B",
+        "reg_no": "stu001"
     },
     {
         "name": "john ikwube",
-        "matric_no": "stu002",
         "subjects": {
             "Mathematics": 43.0,
             "English": 65.0,
@@ -21,11 +20,11 @@
         },
         "total": 132.0,
         "average": 44.0,
-        "grade": "E"
+        "grade": "E",
+        "reg_no": "stu002"
     },
     {
         "name": "nese girinya",
-        "matric_no": "stu003",
         "subjects": {
             "Mathematics": 24.0,
             "English": 53.0,
@@ -33,11 +32,11 @@
         },
         "total": 120.0,
         "average": 40.0,
-        "grade": "E"
+        "grade": "E",
+        "reg_no": "stu003"
     },
     {
         "name": "onyeke benedict",
-        "matric_no": "stu004",
         "subjects": {
             "Mathematics": 12.0,
             "English": 41.0,
@@ -45,11 +44,11 @@
         },
         "total": 82.0,
         "average": 27.333333333333332,
-        "grade": "F"
+        "grade": "F",
+        "reg_no": "stu004"
     },
     {
         "name": "kingsley exenaia",
-        "matric_no": "stu005",
         "subjects": {
             "Mathematics": 68.0,
             "English": 45.0,
@@ -57,11 +56,11 @@
         },
         "total": 192.0,
         "average": 64.0,
-        "grade": "B"
+        "grade": "B",
+        "reg_no": "stu005"
     },
     {
         "name": "eunice obeko",
-        "matric_no": "stu006",
         "subjects": {
             "Mathematics": 54.0,
             "English": 49.0,
@@ -69,14 +68,15 @@
         },
         "total": 120.0,
         "average": 40.0,
-        "grade": "E"
+        "grade": "E",
+        "reg_no": "stu006"
     },
     {
         "name": "abdulah ahmed",
-        "matric_no": "stu007",
         "subjects": {},
         "total": null,
         "average": null,
-        "grade": null
+        "grade": null,
+        "reg_no": "stu007"
     }
 ]

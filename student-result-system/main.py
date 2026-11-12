@@ -31,24 +31,24 @@ def save_students():
 # Register a student
 def register_student():
     name = input("Enter student name: ").strip()
-    matriculation_number = input("Enter matriculation number: ").strip()
+    registration_number = input("Enter registration number: ").strip()
 
     if not name:
         print("Name cannot be empty!")
         return
 
-    if not matriculation_number:
-        print("Matriculation number cannot be empty!")
+    if not registration_number:
+        print("Registration number cannot be empty!")
         return
 
     for student in students:
-        if student["matric_no"].lower() == matriculation_number.lower():
-            print("Matriculation number already exists!")
+        if student["reg_no"].lower() == registration_number.lower():
+            print("Registration number already exists!")
             return
 
     student = {
         "name": name,
-        "matric_no": matriculation_number,
+        "reg_no": registration_number,
         "subjects": {},
         "total": None,
         "average": None,
@@ -79,14 +79,14 @@ def calculate_grade(average):
 
 # Enter student scores
 def enter_scores():
-    matriculation_number = input(
-        "Enter student matriculation number: "
+    registration_number = input(
+        "Enter student registration number: "
     ).strip()
 
     found_student = None
 
     for student in students:
-        if student["matric_no"].lower() == matriculation_number.lower():
+        if student["reg_no"].lower() == registration_number.lower():
             found_student = student
             break
 
@@ -128,7 +128,7 @@ def enter_scores():
 def display_result(student):
     print("\n========== STUDENT RESULT ==========")
     print(f"Name: {student['name']}")
-    print(f"Matriculation Number: {student['matric_no']}")
+    print(f"Registration Number: {student['reg_no']}")
 
     if student["average"] is None:
         print("Scores have not been entered yet.")
@@ -147,12 +147,12 @@ def display_result(student):
 
 # View individual result
 def view_result():
-    matriculation_number = input(
-        "Enter matriculation number: "
+    registration_number = input(
+        "Enter registration number: "
     ).strip()
 
     for student in students:
-        if student["matric_no"].lower() == matriculation_number.lower():
+        if student["reg_no"].lower() == registration_number.lower():
             display_result(student)
             return
 
@@ -171,15 +171,15 @@ def view_all_results():
 
 # Search for a student
 def search_student():
-    matriculation_number = input(
-        "Enter matriculation number to search: "
+    registration_number = input(
+        "Enter registration number to search: "
     ).strip()
 
     for student in students:
-        if student["matric_no"].lower() == matriculation_number.lower():
+        if student["reg_no"].lower() == registration_number.lower():
             print("\nStudent found!")
             print(f"Name: {student['name']}")
-            print(f"Matric Number: {student['matric_no']}")
+            print(f"Registration Number: {student['reg_no']}")
             return
 
     print("Student not found!")
