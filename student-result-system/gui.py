@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import authentication
+import database
 import main
 
 
@@ -350,12 +351,37 @@ def show_register_page():
     name_entry = add_labeled_entry(panel, "Full name")
     registration_entry = add_labeled_entry(panel, "Registration number")
 
+    class_label = tk.Label(
+        panel,
+        text="Class",
+        bg=WHITE,
+        fg=DARK,
+        font=("Segoe UI", 10, "bold")
+    )
+    class_label.pack(anchor="w", pady=(12, 5))
+
+    school_classes = [
+        "Primary 1", "Primary 2", "Primary 3",
+        "Primary 4", "Primary 5", "Primary 6",
+        "JSS 1", "JSS 2", "JSS 3",
+        "SS 1", "SS 2", "SS 3"
+    ]
+
+    class_dropdown = ttk.Combobox(
+        panel,
+        values=school_classes,
+        state="readonly",
+        font=("Segoe UI", 10)
+    )
+    class_dropdown.pack(fill="x", pady=(0, 10))
+    class_dropdown.set("Select class")
+
     def save_student():
         name = name_entry.get().strip()
         registration = registration_entry.get().strip()
+        student_class = class_dropdown.get()
 
-        if not name or not registration:
-            messagebox.showerror("Missing information", "Please fill in both fields.", parent=root)
+        if not name or not registration or student_class == "Select class":
             return
         if not validate_student_name(name):
             messagebox.showerror("Invalid name", "Please enter a valid student name.", parent=root)
@@ -367,6 +393,7 @@ def show_register_page():
         main.students.append({
             "name": name,
             "reg_no": registration,
+            "class_name": student_class,
             "subjects": {},
             "total": None,
             "average": None,
@@ -803,6 +830,7 @@ def show_teacher_dashboard(user):
     ).pack(anchor="w", padx=30, pady=(25, 10))
 
     actions = [
+        "Take Attendance",
         "View Assigned Classes",
         "Monitor Student Attendance",
         "Enter Student Scores",
@@ -813,10 +841,16 @@ def show_teacher_dashboard(user):
         tk.Button(
             page_area,
             text=action,
-            command=lambda name=action: messagebox.showinfo(
-                name,
-                f"{name} will be connected in the next development stage."
-            ),
+    command=lambda name=action: (
+        show_attendance_page(user)
+        if name == "Take Attendance"
+        else show_attendance_history(user)
+        if name == "Monitor Student Attendance"
+        else messagebox.showinfo(
+            name,
+            f"{name} will be connected in the next development stage."
+        )
+    ),
             bg=WHITE,
             fg=NAVY,
             relief="solid",
@@ -826,6 +860,374 @@ def show_teacher_dashboard(user):
             pady=12,
             cursor="hand2"
         ).pack(anchor="w", padx=30, pady=6)
+
+
+
+def show_attendance_page(user):
+    from datetime import date
+
+    clear_page()
+
+    page_heading(
+        "Take Attendance",
+        "Select a class and record student attendance."
+    )
+
+    tk.Button(
+    page_area,
+    text="← Back to Dashboard",
+    command=lambda: show_teacher_dashboard(user),
+    bg=WHITE,
+    fg=NAVY,
+    relief="flat",
+    font=("Segoe UI", 10, "bold")
+    ).pack(anchor="w", padx=30, pady=5)
+
+    database.initialize_database()
+
+    panel = tk.Frame(page_area, bg=WHITE, padx=25, pady=25)
+    panel.pack(fill="both", expand=True, padx=30, pady=20)
+
+    tk.Label(
+        panel,
+        text="Select Class",
+        bg=WHITE,
+        fg=DARK,
+        font=("Segoe UI", 10, "bold")
+    ).pack(anchor="w", pady=5)
+
+    school_classes = [
+        "Primary 1", "Primary 2", "Primary 3",
+        "Primary 4", "Primary 5", "Primary 6",
+        "JSS 1", "JSS 2", "JSS 3",
+        "SS 1", "SS 2", "SS 3"
+    ]
+
+    class_dropdown = ttk.Combobox(
+        panel,
+        values=school_classes,
+        state="readonly"
+    )
+    class_dropdown.pack(fill="x", pady=10)
+    class_dropdown.set("Select class")
+
+    attendance_frame = tk.Frame(panel, bg=WHITE)
+    attendance_frame.pack(fill="both", expand=True)
+
+    def load_class_students():
+        for widget in attendance_frame.winfo_children():
+            widget.destroy()
+
+        selected_class = class_dropdown.get()
+
+        if selected_class == "Select class":
+            messagebox.showwarning(
+                "Select Class",
+                "Please select a class first.",
+                parent=root
+            )
+            return
+
+        class_students = [
+            student for student in main.students
+            if student.get("class_name") == selected_class
+        ]
+
+        if not class_students:
+            tk.Label(
+                attendance_frame,
+                text="No students found in this class.",
+                bg=WHITE,
+                fg=RED
+            ).pack(anchor="w", pady=15)
+            return
+
+        tk.Label(
+            attendance_frame,
+            text=f"Attendance Date: {date.today()}",
+            bg=WHITE,
+            fg=DARK,
+            font=("Segoe UI", 11, "bold")
+        ).pack(anchor="w", pady=10)
+
+        attendance_entries = []
+
+        for student in class_students:
+            row = tk.Frame(attendance_frame, bg=WHITE)
+            row.pack(fill="x", pady=5)
+
+            tk.Label(
+                row,
+                text=f"{student['name']} ({student['reg_no']})",
+                bg=WHITE,
+                fg=DARK,
+                width=30,
+                anchor="w"
+            ).pack(side="left")
+
+            status = ttk.Combobox(
+                row,
+                values=["Present", "Absent", "Late"],
+                state="readonly",
+                width=12
+            )
+            status.set("Present")
+            status.pack(side="right")
+
+            attendance_entries.append((student, status))
+
+        def save_attendance():
+            connection = database.get_connection()
+
+            try:
+                cursor = connection.cursor()
+
+                for student, status in attendance_entries:
+                    cursor.execute("""
+                        INSERT INTO attendance (
+                            reg_no, class_name,
+                            attendance_date, status, marked_by
+                        )
+                        VALUES (?, ?, ?, ?, ?)
+                        ON CONFLICT(reg_no, attendance_date)
+                        DO UPDATE SET
+                            class_name = excluded.class_name,
+                            status = excluded.status,
+                            marked_by = excluded.marked_by
+                    """, (
+                        student["reg_no"],
+                        selected_class,
+                        date.today().isoformat(),
+                        status.get(),
+                        user["id"]
+                    ))
+
+                connection.commit()
+
+                messagebox.showinfo(
+                    "Success",
+                    "Attendance saved successfully.",
+                    parent=root
+                )
+
+            except Exception as error:
+                connection.rollback()
+                messagebox.showerror(
+                    "Attendance Error",
+                    str(error),
+                    parent=root
+                )
+
+            finally:
+                connection.close()
+
+        tk.Button(
+            attendance_frame,
+            text="Save Attendance",
+            command=save_attendance,
+            bg=GREEN,
+            fg=WHITE,
+            font=("Segoe UI", 10, "bold"),
+            relief="flat",
+            padx=20,
+            pady=10
+        ).pack(anchor="w", pady=20)
+
+    tk.Button(
+        panel,
+        text="Load Students",
+        command=load_class_students,
+        bg=NAVY,
+        fg=WHITE,
+        font=("Segoe UI", 10, "bold"),
+        relief="flat",
+        padx=20,
+        pady=10
+    ).pack(anchor="w", pady=10)
+
+
+def show_attendance_history(user):
+    from datetime import date
+
+    clear_page()
+
+    page_heading(
+        "Attendance History",
+        "View previously recorded student attendance."
+    )
+    tk.Button(
+    page_area,
+    text="← Back to Dashboard",
+    command=lambda: show_teacher_dashboard(user),
+    bg=WHITE,
+    fg=NAVY,
+    relief="flat",
+    font=("Segoe UI", 10, "bold")
+    ).pack(anchor="w", padx=30, pady=5)
+
+    database.initialize_database()
+
+    panel = tk.Frame(page_area, bg=WHITE, padx=25, pady=25)
+    panel.pack(fill="both", expand=True, padx=30, pady=20)
+
+    school_classes = [
+        "Primary 1", "Primary 2", "Primary 3",
+        "Primary 4", "Primary 5", "Primary 6",
+        "JSS 1", "JSS 2", "JSS 3",
+        "SS 1", "SS 2", "SS 3"
+    ]
+
+    tk.Label(
+        panel,
+        text="Select Class",
+        bg=WHITE,
+        fg=DARK,
+        font=("Segoe UI", 10, "bold")
+    ).pack(anchor="w")
+
+    class_dropdown = ttk.Combobox(
+        panel,
+        values=school_classes,
+        state="readonly"
+    )
+    class_dropdown.pack(fill="x", pady=8)
+    class_dropdown.set("Select class")
+
+    tk.Label(
+        panel,
+        text="Attendance Date (YYYY-MM-DD)",
+        bg=WHITE,
+        fg=DARK,
+        font=("Segoe UI", 10, "bold")
+    ).pack(anchor="w", pady=(12, 0))
+
+    date_entry = tk.Entry(panel, font=("Segoe UI", 10))
+    date_entry.pack(fill="x", pady=8)
+    date_entry.insert(0, date.today().isoformat())
+
+    history_frame = tk.Frame(panel, bg=WHITE)
+    history_frame.pack(fill="both", expand=True, pady=15)
+
+    def load_history():
+        for widget in history_frame.winfo_children():
+            widget.destroy()
+
+        selected_class = class_dropdown.get()
+        selected_date = date_entry.get().strip()
+
+        if selected_class == "Select class" or not selected_date:
+            messagebox.showwarning(
+                "Missing Information",
+                "Please select a class and enter a date.",
+                parent=root
+            )
+            return
+
+        try:
+            date.fromisoformat(selected_date)
+        except ValueError:
+            messagebox.showerror(
+                "Invalid Date",
+                "Enter the date in YYYY-MM-DD format.",
+                parent=root
+            )
+            return
+
+        connection = database.get_connection()
+
+        try:
+            records = connection.execute("""
+                SELECT
+                    attendance.reg_no,
+                    attendance.status,
+                    attendance.marked_by,
+                    users.username AS teacher
+                FROM attendance
+                LEFT JOIN users
+                    ON attendance.marked_by = users.id
+                WHERE attendance.class_name = ?
+                AND attendance.attendance_date = ?
+                ORDER BY attendance.reg_no
+            """, (selected_class, selected_date)).fetchall()
+
+        finally:
+            connection.close()
+
+        if not records:
+            tk.Label(
+                history_frame,
+                text="No attendance records found for this class and date.",
+                bg=WHITE,
+                fg=RED
+            ).pack(anchor="w", pady=10)
+            return
+
+        headings = tk.Frame(history_frame, bg=NAVY)
+        headings.pack(fill="x")
+
+        for heading in ("Student Name", "Registration No.", "Status", "Marked By"):
+            tk.Label(
+                headings,
+                text=heading,
+                bg=NAVY,
+                fg=WHITE,
+                font=("Segoe UI", 9, "bold"),
+                width=18,
+                anchor="w"
+            ).pack(side="left", padx=5, pady=8)
+
+        for record in records:
+            row = tk.Frame(history_frame, bg=WHITE)
+            row.pack(fill="x", pady=3)
+
+            student = next(
+                (
+                    s for s in main.students
+                    if s.get("reg_no", "").lower() == record["reg_no"].lower()
+                ),
+                None
+            )
+
+            student_name = student["name"] if student else "Unknown Student"
+
+            values = (
+                student_name,
+                record["reg_no"],
+                record["status"],
+                record["teacher"] or f"User ID {record['marked_by']}"
+            )
+
+            for value in values:
+                tk.Label(
+                    row,
+                    text=value,
+                    bg=WHITE,
+                    fg=DARK,
+                    width=18,
+                    anchor="w"
+                ).pack(side="left", padx=5, pady=5)
+
+        tk.Label(
+            history_frame,
+            text=f"Total records: {len(records)}",
+            bg=WHITE,
+            fg=GREEN,
+            font=("Segoe UI", 10, "bold")
+        ).pack(anchor="w", pady=12)
+
+    tk.Button(
+        panel,
+        text="View Attendance",
+        command=load_history,
+        bg=NAVY,
+        fg=WHITE,
+        relief="flat",
+        font=("Segoe UI", 10, "bold"),
+        padx=20,
+        pady=10
+    ).pack(anchor="w", pady=10)
+
+
 
 
 def logout():

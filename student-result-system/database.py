@@ -15,6 +15,9 @@ def get_connection():
     connection = sqlite3.connect(DATABASE_PATH)
     connection.row_factory = sqlite3.Row
 
+    # Enable foreign-key enforcement
+    connection.execute("PRAGMA foreign_keys = ON")
+
     return connection
 
 
@@ -31,6 +34,19 @@ def initialize_database():
             salt TEXT NOT NULL,
             role TEXT NOT NULL
                 CHECK(role IN ('student', 'teacher', 'admin'))
+        )
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS attendance (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            reg_no TEXT NOT NULL,
+            class_name TEXT NOT NULL,
+            attendance_date TEXT NOT NULL,
+            status TEXT NOT NULL
+                CHECK(status IN ('Present', 'Absent', 'Late')),
+            marked_by INTEGER NOT NULL,
+            FOREIGN KEY (marked_by) REFERENCES users(id),
+            UNIQUE(reg_no, attendance_date)
         )
     """)
 
