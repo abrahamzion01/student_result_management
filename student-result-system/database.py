@@ -27,6 +27,21 @@ def initialize_database():
     cursor = connection.cursor()
 
     cursor.execute("""
+        CREATE TABLE IF NOT EXISTS teacher_classes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            teacher_id INTEGER NOT NULL,
+            class_name TEXT NOT NULL,
+            assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+            FOREIGN KEY (teacher_id)
+                REFERENCES users(id)
+                ON DELETE CASCADE,
+
+            UNIQUE(teacher_id, class_name)
+        )
+    """)
+
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
@@ -52,7 +67,37 @@ def initialize_database():
 
     connection.commit()
     connection.close()
+def get_teachers():
+    connection = get_connection()
 
+    teachers = connection.execute("""
+        SELECT id, username
+        FROM users
+        WHERE role = 'teacher'
+        ORDER BY username
+    """).fetchall()
+
+    connection.close()
+    return teachers
+
+
+def assign_teacher_to_class(teacher_id, class_name):
+    connection = get_connection()
+
+    try:
+        connection.execute("""
+            INSERT INTO teacher_classes (teacher_id, class_name)
+            VALUES (?, ?)
+        """, (teacher_id, class_name))
+
+        connection.commit()
+        return True
+
+    except sqlite3.IntegrityError:
+        return False
+
+    finally:
+        connection.close()
 
 if __name__ == "__main__":
     initialize_database()

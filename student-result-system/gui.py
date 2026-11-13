@@ -598,6 +598,147 @@ def show_performer(best=True):
     make_button(panel, "View full result", lambda: show_result_window(student)).pack(anchor="w", pady=(22, 0))
 
 
+
+def show_teacher_classes_admin():
+    database.initialize_database()
+    clear_page()
+
+    page_heading(
+        "Teacher Classes",
+        "Assign teachers to their respective classes."
+    )
+
+    panel = tk.Frame(page_area, bg=WHITE, padx=25, pady=25)
+    panel.pack(fill="x", padx=30, pady=15)
+
+    tk.Label(
+        panel, text="Select Teacher",
+        bg=WHITE, fg=DARK,
+        font=("Segoe UI", 10, "bold")
+    ).pack(anchor="w", pady=(0, 6))
+
+    teachers = database.get_teachers()
+    teacher_options = {
+        teacher["username"]: teacher["id"]
+        for teacher in teachers
+    }
+
+    teacher_var = tk.StringVar()
+    teacher_dropdown = ttk.Combobox(
+        panel,
+        textvariable=teacher_var,
+        values=list(teacher_options.keys()),
+        state="readonly",
+        font=("Segoe UI", 10)
+    )
+    teacher_dropdown.pack(fill="x", pady=(0, 15))
+
+    tk.Label(
+        panel, text="Select Class",
+        bg=WHITE, fg=DARK,
+        font=("Segoe UI", 10, "bold")
+    ).pack(anchor="w", pady=(0, 6))
+
+    school_classes = [
+        "Primary 1", "Primary 2", "Primary 3",
+        "Primary 4", "Primary 5", "Primary 6",
+        "JSS 1", "JSS 2", "JSS 3",
+        "SS 1", "SS 2", "SS 3"
+    ]
+
+    class_var = tk.StringVar()
+    class_dropdown = ttk.Combobox(
+        panel,
+        textvariable=class_var,
+        values=school_classes,
+        state="readonly",
+        font=("Segoe UI", 10)
+    )
+    class_dropdown.pack(fill="x", pady=(0, 18))
+
+    def assign_class():
+        teacher_name = teacher_var.get()
+        class_name = class_var.get()
+
+        if not teacher_name or not class_name:
+            messagebox.showwarning(
+                "Missing Information",
+                "Please select a teacher and a class."
+            )
+            return
+
+        teacher_id = teacher_options[teacher_name]
+
+        success = database.assign_teacher_to_class(
+            teacher_id, class_name
+        )
+
+        if success:
+            messagebox.showinfo(
+                "Success",
+                f"{class_name} assigned to {teacher_name}."
+            )
+            refresh_assignments()
+        else:
+            messagebox.showwarning(
+                "Already Assigned",
+                "This teacher already has this class assigned."
+            )
+
+    make_button(
+        panel, "Assign Class", assign_class
+    ).pack(anchor="w")
+
+    assignments_panel = tk.Frame(
+        page_area, bg=WHITE, padx=25, pady=20
+    )
+    assignments_panel.pack(
+        fill="both", expand=True, padx=30, pady=10
+    )
+
+    section_title(
+        assignments_panel,
+        "Current Teacher Assignments"
+    )
+
+    assignment_list = tk.Listbox(
+        assignments_panel,
+        font=("Segoe UI", 10),
+        height=10,
+        relief="flat",
+        bg="#F7F9FC"
+    )
+    assignment_list.pack(fill="both", expand=True, pady=10)
+
+    def refresh_assignments():
+        assignment_list.delete(0, tk.END)
+
+        connection = database.get_connection()
+
+        rows = connection.execute("""
+            SELECT users.username, teacher_classes.class_name
+            FROM teacher_classes
+            JOIN users ON users.id = teacher_classes.teacher_id
+            ORDER BY users.username, teacher_classes.class_name
+        """).fetchall()
+
+        connection.close()
+
+        for row in rows:
+            assignment_list.insert(
+                tk.END,
+                f"{row['username']}  —  {row['class_name']}"
+            )
+
+        if not rows:
+            assignment_list.insert(
+                tk.END, "No teacher classes assigned yet."
+            )
+
+    refresh_assignments()
+
+
+
 # -------------------- SIDEBAR --------------------
 
 nav_buttons = {}
