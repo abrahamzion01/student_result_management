@@ -29,7 +29,7 @@ BORDER = "#E5EAF2"
 # -------------------- MAIN WINDOW --------------------
 
 root = tk.Tk()
-root.title("EduStack | Student Result Management")
+root.title("ZAIEON Schools | School Management")
 root.geometry("1240x780")
 root.minsize(1050, 680)
 root.configure(bg=BG)
@@ -778,7 +778,7 @@ def add_nav_button(label, icon, command):
 brand = tk.Frame(sidebar, bg=NAVY, padx=22, pady=28)
 brand.pack(fill="x")
 tk.Label(
-    brand, text="EduStack", bg=NAVY, fg=WHITE,
+    brand, text="ZAIEON", bg=NAVY, fg=WHITE,
     font=("Segoe UI", 22, "bold")
 ).pack(anchor="w")
 tk.Label(
@@ -813,7 +813,7 @@ footer = tk.Frame(sidebar, bg=NAVY, padx=22, pady=20)
 footer.pack(side="bottom", fill="x")
 tk.Frame(footer, bg="#34476A", height=1).pack(fill="x", pady=(0, 14))
 tk.Label(
-    footer, text="EduStack Desktop", bg=NAVY, fg=WHITE,
+    footer, text="ZAIEON Schools", bg=NAVY, fg=WHITE,
     font=("Segoe UI", 9, "bold")
 ).pack(anchor="w")
 tk.Label(
@@ -1453,7 +1453,7 @@ def show_login_page():
 
     tk.Label(
         login_card,
-        text="EduStack",
+        text="ZAIEON",
         bg=WHITE,
         fg=NAVY,
         font=("Segoe UI", 27, "bold")
@@ -1538,7 +1538,7 @@ def show_login_page():
 
     tk.Label(
         login_card,
-        text="EduStack | School Management",
+        text="ZAIEON Schools",
         bg=WHITE,
         fg=MUTED,
         font=("Segoe UI", 8)

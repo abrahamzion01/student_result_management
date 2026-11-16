@@ -1,87 +1,68 @@
-# Student Result Management System
+# ZAIEON Schools
 
-## Project Overview
+### Empowering Schools. Developing Futures.
 
-The Student Result Management System is a Python-based terminal application designed to help an administrator manage student records and examination results.
+ZAIEON Schools is a Python-based school management desktop application designed to help primary and secondary schools manage student information, academic results, teacher assignments and essential school operations.
 
-The application allows administrators to register students, enter examination scores for three subjects, calculate total and average scores, automatically assign grades, and view student performance.
+The project is being developed with a focus on simplifying school administration, improving academic record management and creating a connected digital environment for schools.
 
-Student records are stored in a JSON file to ensure that data remains available even after the application is closed.
+## Current Features
 
-## Features
+- Student registration and record management.
+- Student identification using unique registration numbers.
+- Examination score entry and validation.
+- Automatic calculation of total and average scores.
+- Automatic grade assignment.
+- Individual student result viewing.
+- Student search functionality.
+- Best and lowest performing student identification.
+- Administrator, teacher and student authentication.
+- Teacher class assignment.
+- Class-based attendance management.
+- Persistent data storage.
 
-- Register students with their full names and unique matriculation numbers.
-- Prevent duplicate matriculation numbers.
-- Enter examination scores in three subjects:
-  - Mathematics
-  - English
-  - Biology
-- Validate scores to ensure they are between 0 and 100.
-- Automatically calculate total scores.
-- Calculate average scores.
-- Automatically assign grades.
-- View individual student results.
-- Display all registered students and their results.
-- Search for students using matriculation numbers.
-- Identify the best-performing student.
-- Identify the lowest-performing student.
-- Store student records in a JSON database.
-- Preserve student records after restarting the application.
-- Handle invalid user inputs.
+## School Structure
 
-## Grading System
+The system supports the Nigerian primary and secondary school structure:
 
-The application uses the following grading scale:
+- Primary 1–6
+- JSS 1–3
+- SS 1–3
 
-| Average Score | Grade |
-|---|---|
-| 70–100 | A |
-| 60–69 | B |
-| 50–59 | C |
-| 45–49 | D |
-| 40–44 | E |
-| 0–39 | F |
+## User Roles
 
-## How Calculations Work
+**Administrator**
+- Manage school operations.
+- Manage student records.
+- Manage teacher accounts and class assignments.
 
-### Total Score
+**Teacher**
+- Access assigned classes.
+- Support academic and attendance management.
 
-The total score is calculated by adding the scores from the three subjects.
+**Student**
+- Access personal academic information and relevant school records.
 
-`Total = Mathematics + English + Biology`
-
-### Average Score
-
-The average score is calculated by dividing the total score by the number of subjects.
-
-`Average = Total Score / 3`
-
-### Grade Assignment
-
-The system uses conditional statements (`if`, `elif`, and `else`) to compare the student's average score against the grading scale and automatically assign the appropriate grade.
-
-## Technologies Used
+## Technologies
 
 - Python 3
-- JSON for data storage
-- Python standard library
-- Ubuntu/Linux terminal
+- Tkinter – Desktop graphical user interface.
+- SQLite – Database management.
+- JSON – Student record storage.
+- Pytest – Automated testing.
 
 ## Project Structure
 
 ```text
 student-result-system/
 │
-├── main.py
+├── gui.py
+├── database.py
 ├── students.json
+├── test_authentication.py
+├── backup/
 └── README.md
 ```
-
-### File Description
-
-- `main.py`: Contains the application logic, functions, calculations, validation and terminal menu.
-- `students.json`: Stores registered students, examination scores and calculated results.
-- `README.md`: Provides project documentation and usage instructions.
 
 ## Installation and Setup
 
@@ -91,7 +72,7 @@ student-result-system/
 git clone YOUR_GITHUB_REPOSITORY_URL
 ```
 
-### 2. Navigate into the project directory
+### 2. Enter the project directory
 
 ```bash
 cd student-result-system
@@ -100,69 +81,9 @@ cd student-result-system
 ### 3. Run the application
 
 ```bash
-python3 main.py
+python gui.py
 ```
 
-No external Python libraries are required.
+Python 3 is required. Tkinter is also required for the graphical interface.
 
-## Application Menu
-
-When the application starts, the following menu is displayed:
-
-```text
-===== STUDENT RESULT MANAGEMENT =====
-
-1. Register Student
-2. Enter Student Scores
-3. View Student Result
-4. View All Results
-5. Search Student
-6. View Best Performing Student
-7. View Lowest Performing Student
-8. Exit
-
-Choose an option:
-```
-
-## Sample Demonstration
-
-The system was tested with five sample students:
-
-| Student | Matriculation Number | Average | Grade |
-|---|---|---:|---|
-| Emmanuel Odeh | STU001 | 65.67 | B |
-| John Ikwube | STU002 | 44.00 | E |
-| Nese Girinya | STU003 | 40.00 | E |
-| Onyeke Benedict | STU004 | 27.33 | F |
-| Kingsley Exenaia | STU005 | 64.00 | B |
-
-**Best-performing student:** Emmanuel Odeh
-
-**Lowest-performing student:** Onyeke Benedict
-
-## Data Storage
-
-Student information is stored in `students.json`.
-
-The application uses Python's built-in `json` module to save and retrieve student records.
-
-This ensures that registered students and their results remain available after restarting the application.
-
-## Future Improvements
-
-Possible future improvements include:
-
-- Adding more subjects.
-- Editing existing student records.
-- Deleting student records.
-- Generating printable result reports.
-- Adding an SQLite database.
-- Developing a graphical or web-based interface.
-
-## Author
-
-Developed as a Python programming terminal project.
-
-## License
-
-This project is intended for educational and learning purposes.
+## Project Vision
