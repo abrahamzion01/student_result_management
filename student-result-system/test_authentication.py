@@ -3,27 +3,48 @@ import secrets
 
 from authentication import register_user, login_user
 
-# Generate unique usernames so the test can run repeatedly
-suffix = secrets.token_hex(3)
 
-accounts = [
-    (f"student_{suffix}", "student123", "student"),
-    (f"teacher_{suffix}", "teacher123", "teacher"),
-    (f"admin_{suffix}", "admin123", "admin")
-]
+def test_student_registration_and_login():
+    username = f"student_{secrets.token_hex(3)}"
 
-for username, password, role in accounts:
+    registered = register_user(username, "student123", "student")
 
-    # Register account
-    registered = register_user(username, password, role)
-    print(f"{role} registration:", registered)
+    assert registered is True
 
-    # Test correct password
-    user = login_user(username, password)
-    print(f"{role} login:", user)
+    user = login_user(username, "student123")
 
-    # Test incorrect password
-    wrong_login = login_user(username, "wrongpassword")
-    print(f"{role} wrong password:", wrong_login)
+    assert user is not None
 
-    print("-------------------------")
+
+def test_teacher_registration_and_login():
+    username = f"teacher_{secrets.token_hex(3)}"
+
+    registered = register_user(username, "teacher123", "teacher")
+
+    assert registered is True
+
+    user = login_user(username, "teacher123")
+
+    assert user is not None
+
+
+def test_admin_registration_and_login():
+    username = f"admin_{secrets.token_hex(3)}"
+
+    registered = register_user(username, "admin123", "admin")
+
+    assert registered is True
+
+    user = login_user(username, "admin123")
+
+    assert user is not None
+
+
+def test_login_rejects_wrong_password():
+    username = f"student_{secrets.token_hex(3)}"
+
+    register_user(username, "student123", "student")
+
+    user = login_user(username, "wrongpassword")
+
+    assert user is None

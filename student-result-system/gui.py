@@ -753,6 +753,7 @@ def set_active_nav(active):
 
 
 def add_nav_button(label, icon, command):
+
     button = tk.Button(
         sidebar,
         text=f"{icon}   {label}",
@@ -795,6 +796,11 @@ add_nav_button("Register Student", "＋", show_register_page)
 add_nav_button("Enter Scores", "✎", show_scores_page)
 add_nav_button("View All Results", "▤", show_results_page)
 add_nav_button("Search Student", "⌕", show_search_page)
+add_nav_button(
+    "Teacher Classes",
+    "👨‍🏫",
+    show_teacher_classes_admin
+)
 
 tk.Label(
     sidebar, text="PERFORMANCE", bg=NAVY, fg="#8196BA",
