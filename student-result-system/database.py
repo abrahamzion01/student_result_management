@@ -99,6 +99,21 @@ def assign_teacher_to_class(teacher_id, class_name):
     finally:
         connection.close()
 
+
+def get_teacher_classes(teacher_id):
+    connection = get_connection()
+
+    classes = connection.execute("""
+        SELECT class_name
+        FROM teacher_classes
+        WHERE teacher_id = ?
+        ORDER BY class_name
+    """, (teacher_id,)).fetchall()
+
+    connection.close()
+
+    return [row["class_name"] for row in classes]
+
 if __name__ == "__main__":
     initialize_database()
     print("School database created successfully!")

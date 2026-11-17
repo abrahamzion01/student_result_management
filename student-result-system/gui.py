@@ -972,6 +972,38 @@ def show_teacher_dashboard(user):
         "Your registered account"
     )
 
+    assigned_classes = database.get_teacher_classes(user["id"])
+
+    tk.Label(
+        page_area,
+        text="My Assigned Classes",
+        bg=BG,
+        fg=DARK,
+        font=("Segoe UI", 15, "bold")
+    ).pack(anchor="w", padx=30, pady=(25, 10))
+
+    if assigned_classes:
+        for class_name in assigned_classes:
+            tk.Label(
+                page_area,
+                text=f"• {class_name}",
+                bg=WHITE,
+                fg=NAVY,
+                font=("Segoe UI", 11),
+                padx=15,
+                pady=10
+            ).pack(anchor="w", padx=30, pady=3)
+    else:
+        tk.Label(
+            page_area,
+            text="No classes have been assigned to you yet.",
+            bg=WHITE,
+            fg=MUTED,
+            font=("Segoe UI", 10),
+            padx=15,
+            pady=12
+        ).pack(anchor="w", padx=30, pady=3)
+
     tk.Label(
         page_area,
         text="Teaching Activities",
@@ -1047,21 +1079,19 @@ def show_attendance_page(user):
         font=("Segoe UI", 10, "bold")
     ).pack(anchor="w", pady=5)
 
-    school_classes = [
-        "Primary 1", "Primary 2", "Primary 3",
-        "Primary 4", "Primary 5", "Primary 6",
-        "JSS 1", "JSS 2", "JSS 3",
-        "SS 1", "SS 2", "SS 3"
-    ]
+    school_classes =  assigned_classes = database.get_teacher_classes(user["id"])
 
     class_dropdown = ttk.Combobox(
         panel,
-        values=school_classes,
+        values=assigned_classes,
         state="readonly"
     )
-    class_dropdown.pack(fill="x", pady=10)
-    class_dropdown.set("Select class")
 
+    class_dropdown.pack(fill="x", pady=10)
+    if assigned_classes:
+            class_dropdown.set("Select class")
+    else:
+        class_dropdown.set("No classes assigned")
     attendance_frame = tk.Frame(panel, bg=WHITE)
     attendance_frame.pack(fill="both", expand=True)
 
@@ -1075,6 +1105,14 @@ def show_attendance_page(user):
             messagebox.showwarning(
                 "Select Class",
                 "Please select a class first.",
+                parent=root
+            )
+            return
+
+        if selected_class not in assigned_classes:
+            messagebox.showerror(
+                "Access Denied",
+                "You are not assigned to this class.",
                 parent=root
             )
             return
@@ -1128,6 +1166,13 @@ def show_attendance_page(user):
             attendance_entries.append((student, status))
 
         def save_attendance():
+            if selected_class not in database.get_teacher_classes(user["id"]):
+                messagebox.showerror(
+                    "Access Denied",
+                    "You are no longer assigned to this class.",
+                    parent=root
+                )
+                return
             connection = database.get_connection()
 
             try:
