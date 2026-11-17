@@ -1446,12 +1446,12 @@ def show_login_page():
     login_frame.pack(fill="both", expand=True)
 
     login_card = tk.Frame(
-        login_frame,
-        bg=WHITE,
-        padx=45,
-        pady=40,
-        highlightbackground=BORDER,
-        highlightthickness=1
+    login_frame,
+    bg=WHITE,
+    padx=50,
+    pady=38,
+    highlightbackground="#DCE3ED",
+    highlightthickness=1
     )
     login_card.place(relx=0.5, rely=0.5, anchor="center")
 
@@ -1545,11 +1545,11 @@ def show_login_page():
 
     tk.Label(
         login_card,
-        text="ZAIEON Schools",
+        text="A ZAIEON TECHNOLOGIES PRODUCT",
         bg=WHITE,
         fg=MUTED,
-        font=("Segoe UI", 8)
-    ).pack(pady=(22, 0))
+        font=("Segoe UI", 8, "bold")
+    ).pack(pady=(24, 0))
 
     username_entry.focus_set()
 
