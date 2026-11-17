@@ -1,10 +1,14 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+from PIL import Image, ImageTk
+from pathlib import Path
+
 import authentication
 import database
 import main
 
-
+BASE_DIR = Path(__file__).resolve().parent
+LOGO_PATH = BASE_DIR / "assets" / "zaieon-schools-logo.png"
 # Load the existing student records from students.json
 main.load_students()
 
@@ -1451,13 +1455,16 @@ def show_login_page():
     )
     login_card.place(relx=0.5, rely=0.5, anchor="center")
 
+    logo_image = Image.open(LOGO_PATH).convert("RGBA")
+    logo_image.thumbnail((280, 150), Image.Resampling.LANCZOS)
+
+    login_frame.logo_image = ImageTk.PhotoImage(logo_image)
+
     tk.Label(
         login_card,
-        text="ZAIEON",
-        bg=WHITE,
-        fg=NAVY,
-        font=("Segoe UI", 27, "bold")
-    ).pack(pady=(0, 5))
+        image=login_frame.logo_image,
+        bg=WHITE
+    ).pack(pady=(0, 10))
 
     tk.Label(
         login_card,
