@@ -948,6 +948,312 @@ def show_student_dashboard(user):
     ).pack(anchor="w", padx=30, pady=8)
 
 
+def show_teacher_scores_page(user):
+    clear_page()
+
+    page_heading(
+        "Enter Student Scores",
+        "Record scores only for students in your assigned classes."
+    )
+
+    assigned_classes = database.get_teacher_classes(user["id"])
+
+    tk.Button(
+        page_area,
+        text="← Back to Dashboard",
+        command=lambda: show_teacher_dashboard(user),
+        bg=WHITE,
+        fg=NAVY,
+        relief="flat",
+        font=("Segoe UI", 10, "bold"),
+        cursor="hand2"
+    ).pack(anchor="w", padx=30, pady=10)
+
+    if not assigned_classes:
+        messagebox.showinfo(
+            "No assigned classes",
+            "You have not been assigned to any class yet.",
+            parent=root
+        )
+        return
+
+    panel = tk.Frame(
+        page_area, bg=WHITE, padx=28, pady=25,
+        highlightbackground=BORDER, highlightthickness=1
+    )
+    panel.pack(anchor="nw", fill="x", padx=30, pady=5)
+
+    section_title(
+        panel,
+        "Score information",
+        "Select your assigned class and enter the student's registration number."
+    )
+
+    class_dropdown = ttk.Combobox(
+        panel,
+        values=assigned_classes,
+        state="readonly",
+        font=("Segoe UI", 10)
+    )
+    class_dropdown.pack(fill="x", pady=(0, 15))
+    class_dropdown.set("Select class")
+
+    registration_entry = add_labeled_entry(
+        panel,
+        "Registration number"
+    )
+
+    score_entries = {}
+
+    for subject in main.SUBJECTS:
+        score_entries[subject] = add_labeled_entry(
+            panel,
+            f"{subject} score"
+        )
+
+    def save_scores():
+        selected_class = class_dropdown.get()
+        registration = registration_entry.get().strip()
+
+        if selected_class not in assigned_classes:
+            messagebox.showerror(
+                "Invalid class",
+                "Select one of your assigned classes.",
+                parent=root
+            )
+            return
+
+        if selected_class not in database.get_teacher_classes(user["id"]):
+            messagebox.showerror(
+                "Access denied",
+                "You are no longer assigned to this class.",
+                parent=root
+            )
+            return
+
+        if not registration:
+            messagebox.showerror(
+                "Missing information",
+                "Enter a registration number.",
+                parent=root
+            )
+            return
+
+        student = find_student(registration)
+
+        if student is None:
+            messagebox.showerror(
+                "Student not found",
+                "No student has that registration number.",
+                parent=root
+            )
+            return
+
+        if student.get("class_name") != selected_class:
+            messagebox.showerror(
+                "Access denied",
+                "This student does not belong to the selected class.",
+                parent=root
+            )
+            return
+
+        scores = {}
+
+        for subject, entry in score_entries.items():
+            try:
+                score = float(entry.get())
+            except ValueError:
+                messagebox.showerror(
+                    "Invalid score",
+                    f"Enter a number for {subject}.",
+                    parent=root
+                )
+                return
+
+            if not 0 <= score <= 100:
+                messagebox.showerror(
+                    "Invalid score",
+                    f"{subject} must be between 0 and 100.",
+                    parent=root
+                )
+                return
+
+            scores[subject] = score
+
+        total = sum(scores.values())
+        average = total / len(main.SUBJECTS)
+
+        student["subjects"] = scores
+        student["total"] = total
+        student["average"] = average
+        student["grade"] = main.calculate_grade(average)
+
+        main.save_students()
+
+        messagebox.showinfo(
+            "Success",
+            "Student scores saved successfully.",
+            parent=root
+        )
+
+        show_teacher_dashboard(user)
+
+    actions = tk.Frame(panel, bg=WHITE)
+    actions.pack(fill="x", pady=(20, 0))
+
+    make_button(
+        actions,
+        "Save scores",
+        save_scores
+    ).pack(side="left")
+
+    make_button(
+        actions,
+        "Cancel",
+        lambda: show_teacher_dashboard(user),
+        primary=False
+    ).pack(side="left", padx=10)
+
+
+def show_teacher_results_page(user):
+    clear_page()
+
+    page_heading(
+        "Compile Results",
+        "View academic results for students in your assigned classes."
+    )
+
+    assigned_classes = database.get_teacher_classes(user["id"])
+
+    tk.Button(
+        page_area,
+        text="← Back to Dashboard",
+        command=lambda: show_teacher_dashboard(user),
+        bg=WHITE,
+        fg=NAVY,
+        relief="flat",
+        font=("Segoe UI", 10, "bold"),
+        cursor="hand2"
+    ).pack(anchor="w", padx=30, pady=10)
+
+    if not assigned_classes:
+        messagebox.showinfo(
+            "No assigned classes",
+            "You have not been assigned to any class yet.",
+            parent=root
+        )
+        return
+
+    panel = tk.Frame(
+        page_area, bg=WHITE, padx=18, pady=18,
+        highlightbackground=BORDER, highlightthickness=1
+    )
+    panel.pack(fill="both", expand=True, padx=30, pady=5)
+
+    tk.Label(
+        panel,
+        text="Select class",
+        bg=WHITE,
+        fg=DARK,
+        font=("Segoe UI", 10, "bold")
+    ).pack(anchor="w")
+
+    class_dropdown = ttk.Combobox(
+        panel,
+        values=assigned_classes,
+        state="readonly",
+        font=("Segoe UI", 10)
+    )
+    class_dropdown.pack(fill="x", pady=(5, 15))
+    class_dropdown.set("Select class")
+
+    columns = (
+        "name", "registration", "maths", "english",
+        "biology", "total", "average", "grade"
+    )
+
+    table = ttk.Treeview(
+        panel,
+        columns=columns,
+        show="headings"
+    )
+
+    headings = {
+        "name": "STUDENT",
+        "registration": "REGISTRATION NO.",
+        "maths": "MATHEMATICS",
+        "english": "ENGLISH",
+        "biology": "BIOLOGY",
+        "total": "TOTAL",
+        "average": "AVERAGE",
+        "grade": "GRADE",
+    }
+
+    for col in columns:
+        table.heading(col, text=headings[col])
+        table.column(col, width=115, anchor="center")
+
+    table.column("name", width=160, anchor="w")
+    table.column("registration", width=140)
+
+    table.pack(fill="both", expand=True)
+
+    def load_results():
+        selected_class = class_dropdown.get()
+
+        if selected_class not in assigned_classes:
+            messagebox.showerror(
+                "Invalid class",
+                "Select one of your assigned classes.",
+                parent=root
+            )
+            return
+
+        if selected_class not in database.get_teacher_classes(user["id"]):
+            messagebox.showerror(
+                "Access denied",
+                "You are no longer assigned to this class.",
+                parent=root
+            )
+            return
+
+        for item in table.get_children():
+            table.delete(item)
+
+        for student in main.students:
+            if student.get("class_name") != selected_class:
+                continue
+
+            subjects = student.get("subjects", {})
+            average = student.get("average")
+
+            if average is None:
+                values = (
+                    student.get("name", ""),
+                    student.get("reg_no", ""),
+                    "-", "-", "-", "-", "Pending", "-"
+                )
+            else:
+                values = (
+                    student.get("name", ""),
+                    student.get("reg_no", ""),
+                    subjects.get("Mathematics", "-"),
+                    subjects.get("English", "-"),
+                    subjects.get("Biology", "-"),
+                    student.get("total", "-"),
+                    f"{average:.2f}%",
+                    student.get("grade", "-"),
+                )
+
+            table.insert("", "end", values=values)
+
+    make_button(
+        panel,
+        "Load Results",
+        load_results
+    ).pack(anchor="w", pady=(15, 0))
+
+
 def show_teacher_dashboard(user):
     clear_page()
 
@@ -1023,12 +1329,16 @@ def show_teacher_dashboard(user):
     for action in actions:
         tk.Button(
             page_area,
-            text=action,
+                text=action,
     command=lambda name=action: (
         show_attendance_page(user)
         if name == "Take Attendance"
         else show_attendance_history(user)
         if name == "Monitor Student Attendance"
+        else show_teacher_scores_page(user)
+        if name == "Enter Student Scores"
+        else show_teacher_results_page(user)
+        if name == "Compile Results"
         else messagebox.showinfo(
             name,
             f"{name} will be connected in the next development stage."
