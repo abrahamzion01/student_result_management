@@ -1253,6 +1253,64 @@ def show_teacher_results_page(user):
         load_results
     ).pack(anchor="w", pady=(15, 0))
 
+def show_teacher_assigned_classes(user):
+    clear_page()
+
+    page_heading(
+        "My Assigned Classes",
+        "View the classes assigned to your teacher account."
+    )
+
+    tk.Button(
+        page_area,
+        text="← Back to Dashboard",
+        command=lambda: show_teacher_dashboard(user),
+        bg=WHITE,
+        fg=NAVY,
+        relief="flat",
+        font=("Segoe UI", 10, "bold"),
+        cursor="hand2"
+    ).pack(anchor="w", padx=30, pady=10)
+
+    assigned_classes = database.get_teacher_classes(user["id"])
+
+    panel = tk.Frame(
+        page_area,
+        bg=WHITE,
+        padx=25,
+        pady=20,
+        highlightbackground=BORDER,
+        highlightthickness=1
+    )
+    panel.pack(fill="x", padx=30, pady=10)
+
+    section_title(
+        panel,
+        "Assigned Classes",
+        "These are the classes you are authorized to teach."
+    )
+
+    if assigned_classes:
+        for class_name in assigned_classes:
+            tk.Label(
+                panel,
+                text=f"• {class_name}",
+                bg=WHITE,
+                fg=NAVY,
+                font=("Segoe UI", 11),
+                padx=10,
+                pady=10
+            ).pack(anchor="w")
+    else:
+        tk.Label(
+            panel,
+            text="No classes have been assigned to you yet.",
+            bg=WHITE,
+            fg=MUTED,
+            font=("Segoe UI", 10),
+            padx=10,
+            pady=12
+        ).pack(anchor="w")
 
 def show_teacher_dashboard(user):
     clear_page()
@@ -1333,6 +1391,8 @@ def show_teacher_dashboard(user):
     command=lambda name=action: (
         show_attendance_page(user)
         if name == "Take Attendance"
+        else show_teacher_assigned_classes(user)
+        if name == "View Assigned Classes"
         else show_attendance_history(user)
         if name == "Monitor Student Attendance"
         else show_teacher_scores_page(user)
