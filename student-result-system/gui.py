@@ -326,6 +326,7 @@ def show_dashboard():
         ("✎  Enter scores", show_scores_page),
         ("▤  View all results", show_results_page),
         ("⌕  Search student", show_search_page),
+        ("🔐  Create student account", show_create_student_account_page),
     ]:
         tk.Button(
             quick_panel, text=label, command=command,
@@ -414,6 +415,98 @@ def show_register_page():
 
 
 # -------------------- ENTER SCORES --------------------
+
+def show_create_student_account_page():
+    set_active_nav("Dashboard")
+    clear_page()
+    page_heading(
+        "Create student account",
+        "Create login credentials for an already registered student."
+    )
+
+    panel = tk.Frame(
+        page_area, bg=WHITE, padx=28, pady=25,
+        highlightbackground=BORDER, highlightthickness=1
+    )
+    panel.pack(anchor="nw", fill="x", padx=30, pady=5)
+
+    section_title(
+        panel,
+        "Student login details",
+        "Use the student's existing registration number."
+    )
+
+    registration_entry = add_labeled_entry(
+        panel, "Registration number"
+    )
+
+    username_entry = add_labeled_entry(
+        panel, "Username"
+    )
+
+    password_entry = add_labeled_entry(
+        panel, "Password"
+    )
+    password_entry.configure(show="*")
+
+    def create_account():
+        registration = registration_entry.get().strip()
+        username = username_entry.get().strip()
+        password = password_entry.get()
+
+        if not registration or not username or not password:
+            messagebox.showerror(
+                "Missing information",
+                "Please fill in all fields.",
+                parent=root
+            )
+            return
+
+        student = find_student(registration)
+
+        if student is None:
+            messagebox.showerror(
+                "Student not found",
+                "No student has this registration number.",
+                parent=root
+            )
+            return
+
+        registered = authentication.register_user(
+            username,
+            password,
+            "student",
+            registration
+        )
+
+        if not registered:
+            messagebox.showerror(
+                "Registration failed",
+                "Account creation failed. Check that the username "
+                "is available and the password has at least 8 characters.",
+                parent=root
+            )
+            return
+
+        messagebox.showinfo(
+            "Success",
+            f"Login account created for {student['name']}.",
+            parent=root
+        )
+
+        show_dashboard()
+
+    actions = tk.Frame(panel, bg=WHITE)
+    actions.pack(fill="x", pady=(20, 0))
+
+    make_button(
+        actions, "Create account", create_account
+    ).pack(side="left")
+
+    make_button(
+        actions, "Cancel", show_dashboard, primary=False
+    ).pack(side="left", padx=10)
+
 
 def show_scores_page():
     set_active_nav("Enter Scores")

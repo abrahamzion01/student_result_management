@@ -27,7 +27,7 @@ def hash_password(password, salt):
     return password_hash.hex()
 
 
-def register_user(username, password, role):
+def register_user(username, password, role, reg_no=None):
     username = username.strip()
     role = role.strip().lower()
 
@@ -39,6 +39,11 @@ def register_user(username, password, role):
 
     if role not in VALID_ROLES:
         return False
+
+    if role == "student":
+        if not reg_no or not reg_no.strip():
+            return False
+        reg_no = reg_no.strip()
 
     # Generate a random salt
     salt = secrets.token_hex(16)
@@ -56,6 +61,14 @@ def register_user(username, password, role):
             INSERT INTO users (username, password_hash, salt, role)
             VALUES (?, ?, ?, ?)
         """, (username, password_hash, salt, role))
+
+        user_id = cursor.lastrowid
+
+        if role == "student":
+            cursor.execute("""
+                INSERT INTO student_accounts (user_id, reg_no)
+                VALUES (?, ?)
+            """, (user_id, reg_no))
 
         connection.commit()
         return True

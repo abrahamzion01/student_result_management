@@ -52,6 +52,16 @@ def initialize_database():
         )
     """)
     cursor.execute("""
+        CREATE TABLE IF NOT EXISTS student_accounts (
+            user_id INTEGER PRIMARY KEY,
+            reg_no TEXT UNIQUE NOT NULL,
+
+            FOREIGN KEY (user_id)
+                REFERENCES users(id)
+                ON DELETE CASCADE
+        )
+    """)
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS attendance (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             reg_no TEXT NOT NULL,
@@ -117,3 +127,25 @@ def get_teacher_classes(teacher_id):
 if __name__ == "__main__":
     initialize_database()
     print("School database created successfully!")
+
+
+def get_student_reg_no(user_id):
+    connection = get_connection()
+
+    try:
+        cursor = connection.cursor()
+
+        cursor.execute(
+            "SELECT reg_no FROM student_accounts WHERE user_id = ?",
+            (user_id,)
+        )
+
+        result = cursor.fetchone()
+
+        if result:
+            return result["reg_no"]
+
+        return None
+
+    finally:
+        connection.close()
