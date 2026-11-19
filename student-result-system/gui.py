@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from PIL import Image, ImageTk
 from pathlib import Path
+import secrets
+
 
 import authentication
 import database
@@ -380,19 +382,42 @@ def show_register_page():
     )
     class_dropdown.pack(fill="x", pady=(0, 10))
     class_dropdown.set("Select class")
+    username_entry = add_labeled_entry(panel, "Student username")
 
     def save_student():
         name = name_entry.get().strip()
         registration = registration_entry.get().strip()
         student_class = class_dropdown.get()
+        username = username_entry.get().strip()
+        temporary_password = secrets.token_urlsafe(9)
 
-        if not name or not registration or student_class == "Select class":
+        if not name or not registration or not username or student_class == "Select class":
+            messagebox.showerror(
+                "Missing information",
+                "Please complete all fields.",
+                parent=root
+            )
             return
         if not validate_student_name(name):
             messagebox.showerror("Invalid name", "Please enter a valid student name.", parent=root)
             return
         if find_student(registration):
             messagebox.showerror("Duplicate record", "That registration number already exists.", parent=root)
+            return
+
+        registered = authentication.register_user(
+            username,
+            temporary_password,
+            "student",
+            registration
+        )
+
+        if not registered:
+            messagebox.showerror(
+                "Account creation failed",
+                "This username may already exist, or the registration number may already be linked to another account.",
+                parent=root
+            )
             return
 
         main.students.append({
@@ -405,9 +430,18 @@ def show_register_page():
             "grade": None,
         })
         main.save_students()
-        messagebox.showinfo("Success", "Student registered successfully.", parent=root)
-        show_dashboard()
 
+        messagebox.showinfo(
+            "Student registered successfully",
+            f"Student: {name}\n"
+            f"Registration Number: {registration}\n"
+            f"Username: {username}\n"
+            f"Temporary Password: {temporary_password}\n\n"
+            "Please securely share these login details with the student.",
+            parent=root
+        )
+
+        show_dashboard()
     actions = tk.Frame(panel, bg=WHITE)
     actions.pack(fill="x", pady=(20, 0))
     make_button(actions, "Save student", save_student).pack(side="left")

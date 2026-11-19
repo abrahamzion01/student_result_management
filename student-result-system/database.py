@@ -51,6 +51,20 @@ def initialize_database():
                 CHECK(role IN ('student', 'teacher', 'admin'))
         )
     """)
+
+
+    # Add password-change tracking to existing databases
+    columns = [
+        column["name"]
+        for column in cursor.execute("PRAGMA table_info(users)").fetchall()
+    ]
+
+    if "must_change_password" not in columns:
+        cursor.execute("""
+            ALTER TABLE users
+            ADD COLUMN must_change_password INTEGER NOT NULL DEFAULT 0
+        """)
+
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS student_accounts (
             user_id INTEGER PRIMARY KEY,

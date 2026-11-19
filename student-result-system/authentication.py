@@ -58,9 +58,21 @@ def register_user(username, password, role, reg_no=None):
         cursor = connection.cursor()
 
         cursor.execute("""
-            INSERT INTO users (username, password_hash, salt, role)
-            VALUES (?, ?, ?, ?)
-        """, (username, password_hash, salt, role))
+        INSERT INTO users (
+            username,
+            password_hash,
+            salt,
+            role,
+            must_change_password
+        )
+        VALUES (?, ?, ?, ?, ?)
+    """, (
+        username,
+        password_hash,
+        salt,
+        role,
+        1 if role == "student" else 0
+    ))
 
         user_id = cursor.lastrowid
 
@@ -105,12 +117,12 @@ def login_user(username, password):
             entered_hash,
             user["password_hash"]
         ):
-            return {
+                return {
                 "id": user["id"],
                 "username": user["username"],
-                "role": user["role"]
+                "role": user["role"],
+                "must_change_password": user["must_change_password"]
             }
-
         return None
 
     finally:
