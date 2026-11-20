@@ -1062,10 +1062,7 @@ def show_student_dashboard(user):
     tk.Button(
         page_area,
         text="View My Results",
-        command=lambda: messagebox.showinfo(
-            "Results",
-            "Your personal results page will be connected soon."
-        ),
+        command=lambda: show_my_results(user),
         bg=GREEN,
         fg=WHITE,
         font=("Segoe UI", 10, "bold"),
@@ -1073,6 +1070,30 @@ def show_student_dashboard(user):
         padx=20,
         pady=12
     ).pack(anchor="w", padx=30, pady=8)
+
+
+def show_my_results(user):
+    registration = database.get_student_reg_no(user["id"])
+
+    if not registration:
+        messagebox.showerror(
+            "Student record not found",
+            "Your account is not linked to a student record.",
+            parent=root
+        )
+        return
+
+    student = find_student(registration)
+
+    if student is None:
+        messagebox.showerror(
+            "Student record not found",
+            "Your student record could not be found.",
+            parent=root
+        )
+        return
+
+    show_result_window(student)
 
 
 def show_change_password_page(user):
