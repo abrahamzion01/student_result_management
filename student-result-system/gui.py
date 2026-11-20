@@ -1075,6 +1075,103 @@ def show_student_dashboard(user):
     ).pack(anchor="w", padx=30, pady=8)
 
 
+def show_change_password_page(user):
+    clear_page()
+
+    page_heading(
+        "Change Your Password",
+        "Please create a new password before accessing your student dashboard."
+    )
+
+    panel = tk.Frame(
+        page_area,
+        bg=WHITE,
+        padx=28,
+        pady=25,
+        highlightbackground=BORDER,
+        highlightthickness=1
+    )
+    panel.pack(anchor="nw", fill="x", padx=30, pady=5)
+
+    section_title(
+        panel,
+        "Set a new password",
+        "Your new password must contain at least 8 characters."
+    )
+
+    new_password_entry = add_labeled_entry(
+        panel,
+        "New password"
+    )
+    new_password_entry.configure(show="*")
+
+    confirm_password_entry = add_labeled_entry(
+        panel,
+        "Confirm new password"
+    )
+    confirm_password_entry.configure(show="*")
+
+    def save_new_password():
+        new_password = new_password_entry.get()
+        confirm_password = confirm_password_entry.get()
+
+        if not new_password or not confirm_password:
+            messagebox.showerror(
+                "Missing information",
+                "Please complete both password fields.",
+                parent=root
+            )
+            return
+
+        if len(new_password) < 8:
+            messagebox.showerror(
+                "Weak password",
+                "Your password must contain at least 8 characters.",
+                parent=root
+            )
+            return
+
+        if new_password != confirm_password:
+            messagebox.showerror(
+                "Password mismatch",
+                "The passwords do not match.",
+                parent=root
+            )
+            return
+
+        changed = authentication.change_password(
+            user["id"],
+            new_password
+        )
+
+        if not changed:
+            messagebox.showerror(
+                "Password update failed",
+                "Unable to update your password. Please try again.",
+                parent=root
+            )
+            return
+
+        user["must_change_password"] = 0
+
+        messagebox.showinfo(
+            "Password updated",
+            "Your password has been changed successfully.",
+            parent=root
+        )
+
+        show_student_dashboard(user)
+
+    actions = tk.Frame(panel, bg=WHITE)
+    actions.pack(fill="x", pady=(20, 0))
+
+    make_button(
+        actions,
+        "Save new password",
+        save_new_password
+    ).pack(side="left")
+
+
 def show_teacher_scores_page(user):
     clear_page()
 
@@ -1975,7 +2072,11 @@ def handle_login(username_entry, password_entry):
 
     elif user["role"] == "student":
         sidebar.pack_forget()
-        show_student_dashboard(user)
+
+        if user["must_change_password"]:
+            show_change_password_page(user)
+        else:
+            show_student_dashboard(user)
 
 
 def show_login_page():

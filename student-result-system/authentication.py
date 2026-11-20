@@ -127,3 +127,31 @@ def login_user(username, password):
 
     finally:
         connection.close()
+
+
+def change_password(user_id, new_password):
+    if not new_password or len(new_password) < 8:
+        return False
+
+    salt = secrets.token_hex(16)
+    password_hash = hash_password(new_password, salt)
+
+    connection = get_connection()
+
+    try:
+        cursor = connection.cursor()
+
+        cursor.execute("""
+            UPDATE users
+            SET password_hash = ?,
+                salt = ?,
+                must_change_password = 0
+            WHERE id = ?
+        """, (password_hash, salt, user_id))
+
+        connection.commit()
+
+        return cursor.rowcount == 1
+
+    finally:
+        connection.close()
